@@ -295,5 +295,125 @@ class DataSeeder extends Seeder
                 'year' => 2019,
             ]
         ]);
+
+        DB::table('evaluate')->insert([
+            [
+                'profits'=> 200
+            ],
+            [
+                'profits'=> 400
+            ],
+            [
+                'profits'=> 300
+            ],
+        ]);
+
+        DB::table('department')->insert([
+            [
+                'name' => 'Production Room',
+                'id_evaluate' => 1
+            ],
+            [
+                'name'=>'Import Room',
+                'id_evaluate' => 2
+            ],
+            [
+                'name'=>'Maketing Room',
+                'id_evaluate' => 3
+            ],
+        ]);
+
+        DB::table('kpi_department')->insert([
+            [
+                'id_department' => 1,
+                'profits' => 100,
+                'month' => 1,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 1,
+                'profits' => 200,
+                'month' => 2,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 1,
+                'profits' => 300,
+                'month' => 3,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 1,
+                'profits' => 500,
+                'month' => 4,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 1,
+                'profits' => 400,
+                'month' => 5,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 2,
+                'profits' => 100,
+                'month' => 1,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 2,
+                'profits' => 200,
+                'month' => 2,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 2,
+                'profits' => 300,
+                'month' => 3,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 2,
+                'profits' => 500,
+                'month' => 4,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 2,
+                'profits' => 400,
+                'month' => 5,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 3,
+                'profits' => 100,
+                'month' => 1,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 3,
+                'profits' => 200,
+                'month' => 2,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 3,
+                'profits' => 300,
+                'month' => 3,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 3,
+                'profits' => 500,
+                'month' => 4,
+                'year' => 2019
+            ],
+            [
+                'id_department' => 3,
+                'profits' => 400,
+                'month' => 5,
+                'year' => 2019
+            ],
+        ]);
     }
 }

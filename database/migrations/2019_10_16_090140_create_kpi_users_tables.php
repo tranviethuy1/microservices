@@ -54,6 +54,28 @@ class CreateKpiUsersTables extends Migration
             $table->integer('year');
             $table->timestamps();
         });
+
+        Schema::create('evaluate', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('profits');
+            $table->timestamps();
+        });
+
+        Schema::create('department', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('name');
+            $table->string('id_evaluate');
+            $table->timestamps();
+        });
+
+        Schema::create('kpi_department', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->integer('id_department')->unsigned();
+            $table->integer('profits');
+            $table->integer('month');
+            $table->integer('year');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -70,5 +92,11 @@ class CreateKpiUsersTables extends Migration
         Schema::dropIfExists('password_resets');
 
         Schema::dropIfExists('kpi_users');
+
+        Schema::dropIfExists('evaluate');
+
+        Schema::dropIfExists('department');
+
+        Schema::dropIfExists('kpi_department');
     }
 }

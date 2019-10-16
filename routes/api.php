@@ -23,3 +23,8 @@ Route::get('microservice/kpi/user/{id_user}', 'Api\KpiController@evaluateKpiUser
     ->middleware('checkevaluatekpiuser');
 
 Route::get('microservice/kpi/users', 'Api\KpiController@evaluateKpiAllUsers');
+
+Route::get('microservice/kpi/department/{id_department}', 'Api\KpiController@evaluateKpiDepartment')
+    ->middleware('checkevaluatekpidepartment');
+
+Route::get('microservice/kpi/departments', 'Api\KpiController@evaluateKpiAllDepartments');
