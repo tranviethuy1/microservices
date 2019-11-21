@@ -62,6 +62,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'checkevaluatekpiuser' => \App\Http\Middleware\CheckEvaluateKpiUser::class,
         'checkevaluatekpidepartment' => \App\Http\Middleware\CheckEvaluateKpiDepartment::class,
+        'checkmanagerdepartmentapi' => \App\Http\Middleware\CheckManageDepartmentApi::class,
     ];
 
     /**
