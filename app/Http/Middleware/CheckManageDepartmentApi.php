@@ -16,11 +16,7 @@ class CheckManageDepartmentApi
     public function handle($request, Closure $next)
     {
         $id_department = $request->id_department;
-        $year = $request->year;
         if(!isset($id_department) || empty($id_department) || !is_numeric($id_department)){
-            return response()->json(['error' => 'Something was wrong with request'], 400);
-        }
-        if(!isset($year) || empty($year) || !is_numeric($year)){
             return response()->json(['error' => 'Something was wrong with request'], 400);
         }
         return $next($request);

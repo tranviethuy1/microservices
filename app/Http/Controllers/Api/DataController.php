@@ -9,7 +9,6 @@ class DataController extends Controller
 {
     public function managerDepartment(Request $request){
         $id_department = $request->id_department;
-        $year = $request->year;
         $data = [];
         //get department's information
         try{
@@ -31,12 +30,23 @@ class DataController extends Controller
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => 'Something was wrong with api get criteria\'s information'], 200);
         }
-        //get kpi of department in year
+        //get kpi of department
         try{
-            $urlGetDepartmentKpi = 'http://18.217.21.235:8083/api/v1/departmentKPI/getDepartmentKPIByYear?year='.$year.'&departmentId='.$id_department;
+            $urlGetDepartmentKpi = 'http://18.217.21.235:8083/api/v1/departmentKPI/getDepartmentKPIAllYear?departmentId='.$id_department;
             $clientKpi = new Client();
             $response = $clientKpi->request('GET', $urlGetDepartmentKpi);
-            $kpi = json_decode($response->getBody()->getContents());
+            $kpiAndTime = json_decode($response->getBody()->getContents());
+            $kpi = [];
+            $kpiYears = json_decode(json_encode($kpiAndTime->data->timeAndKPI), true);
+            $urlGetDepartmentKpiMonthInYear = 'http://18.217.21.235:8083/api/v1/departmentKPI/getDepartmentKPIAllMonthOfYear?departmentId='.$id_department.'&year=';
+            foreach ($kpiYears as $year => $kpiYear){
+                $urlInLoop = $urlGetDepartmentKpiMonthInYear.$year;
+                $record = [] ;
+                $record['kpi'] = $kpiYear;
+                $responseInLoop = $clientKpi->request('GET', $urlInLoop);
+                $record['detail'] = json_decode($responseInLoop->getBody()->getContents())->data->timeAndKPI;
+                $kpi[$year] = $record;
+            }
             $data['kpi'] = $kpi;
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => 'Something was wrong with api get kpi of department'], 200);

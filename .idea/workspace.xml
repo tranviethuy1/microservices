@@ -2,14 +2,9 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="34658342-01ec-4063-8c6e-e5973eefa4c8" name="Default Changelist" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/microservice.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/microservice.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/php.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.zip" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/Http/Kernel.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Kernel.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.json" beforeDir="false" afterPath="$PROJECT_DIR$/composer.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/composer.lock" beforeDir="false" afterPath="$PROJECT_DIR$/composer.lock" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database.zip" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Controllers/Api/DataController.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Controllers/Api/DataController.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/CheckManageDepartmentApi.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/CheckManageDepartmentApi.php" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/routes/api.php" beforeDir="false" afterPath="$PROJECT_DIR$/routes/api.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -171,7 +166,8 @@
       <updated>1570461101302</updated>
       <workItem from="1570461106402" duration="5413000" />
       <workItem from="1571193110505" duration="27682000" />
-      <workItem from="1574323969183" duration="7343000" />
+      <workItem from="1574323969183" duration="7822000" />
+      <workItem from="1574760417270" duration="6261000" />
     </task>
     <servers />
   </component>
@@ -183,7 +179,9 @@
       <map>
         <entry key="MAIN">
           <value>
-            <State />
+            <State>
+              <option name="COLUMN_ORDER" />
+            </State>
           </value>
         </entry>
       </map>
@@ -199,8 +197,13 @@
         </line-breakpoint>
         <line-breakpoint enabled="true" type="php">
           <url>file://$PROJECT_DIR$/app/Http/Controllers/Api/DataController.php</url>
-          <line>15</line>
+          <line>14</line>
           <option name="timeStamp" value="5" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/app/Http/Controllers/Api/DataController.php</url>
+          <line>50</line>
+          <option name="timeStamp" value="6" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>
