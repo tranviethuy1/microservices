@@ -13,21 +13,21 @@ use Illuminate\Http\Request;
 |
 */
 
-Route::middleware('auth:api')->get('/user', function (Request $request) {
-    return $request->user();
-});
-
-Route::get('microservice/helloworld', 'Api\ConnectController@connect');
-
-Route::get('microservice/kpi/user/{id_user}', 'Api\KpiController@evaluateKpiUser')
-    ->middleware('checkevaluatekpiuser');
-
-Route::get('microservice/kpi/users', 'Api\KpiController@evaluateKpiAllUsers');
-
-Route::get('microservice/kpi/department/{id_department}', 'Api\KpiController@evaluateKpiDepartment')
-    ->middleware('checkevaluatekpidepartment');
-
-Route::get('microservice/kpi/departments', 'Api\KpiController@evaluateKpiAllDepartments');
+//Route::middleware('auth:api')->get('/user', function (Request $request) {
+//    return $request->user();
+//});
+//
+//Route::get('microservice/helloworld', 'Api\ConnectController@connect');
+//
+//Route::get('microservice/kpi/user/{id_user}', 'Api\KpiController@evaluateKpiUser')
+//    ->middleware('checkevaluatekpiuser');
+//
+//Route::get('microservice/kpi/users', 'Api\KpiController@evaluateKpiAllUsers');
+//
+//Route::get('microservice/kpi/department/{id_department}', 'Api\KpiController@evaluateKpiDepartment')
+//    ->middleware('checkevaluatekpidepartment');
+//
+//Route::get('microservice/kpi/departments', 'Api\KpiController@evaluateKpiAllDepartments');
 
 
 //---------------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ Route::get('microservice/kpi/departments', 'Api\KpiController@evaluateKpiAllDepa
 Route::get('microservice/manager/kpi/department/{id_department}', 'Api\DataController@managerDepartment')
     ->middleware('checkmanagerdepartmentapi');
 
-Route::get('microservice/manager/kpi/user/{id_user}', 'Api\DataController@managerUser')
+Route::get('microservice/manager/kpi/user/{id_user}/{id_project}', 'Api\DataController@managerUser')
     ->middleware('checkmanageruserapi');
 
 Route::get('microservice/manager/kpi/projects/{year}', 'Api\DataController@manageProjectKPI')->middleware('CheckInputManageKpiProject');

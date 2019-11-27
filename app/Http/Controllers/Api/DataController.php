@@ -18,7 +18,7 @@ class DataController extends Controller
             $department= json_decode($response->getBody()->getContents());
             $data['department'] = $department->department;
         }catch (\Exception $e){
-            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get department\'s information'], 200);
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get department\'s information'], 400);
         }
         // Get department's criteria
         try{
@@ -28,7 +28,7 @@ class DataController extends Controller
             $criteria = json_decode($response->getBody()->getContents());
             $data['criteria'] = $criteria;
         }catch (\Exception $e){
-            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get criteria\'s information'], 200);
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get criteria\'s information'], 400);
         }
 
         //get kpi of department
@@ -50,7 +50,7 @@ class DataController extends Controller
             }
             $data['kpi'] = $kpi;
         }catch (\Exception $e){
-            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get kpi of department'], 200);
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get kpi of department'], 400);
         }
         return response()->json(['success' => 1, 'data' => $data], 200);
     }
@@ -99,5 +99,56 @@ class DataController extends Controller
 
         return response()->json(['success' => 1, 'data' => $data], 200);
 
+    }
+
+    public function managerUser(Request $request){
+        $id_user = $request->id_user;
+        $id_project = $request->id_project;
+        $data = [];
+        // Get user's information
+        try{
+            $urlGetUserInfo = 'https://dsd05-dot-my-test-project-252009.appspot.com/user/getUserInfo?id='.$id_user;
+            $clientInfo = new Client();
+            $response = $clientInfo->request('GET', $urlGetUserInfo);
+            $user= json_decode($response->getBody()->getContents());
+            $data['user'] = $user;
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get user\'s information'], 400);
+        }
+
+        //get user's criteria with project
+        try{
+            $urlGetUseCriteriaProject = 'http://206.189.34.124:5000/api/group8/kpis?project_id='.$id_project.'&employee_id='.$id_user;
+            $clientCriteriaProject = new Client();
+            $responseCriteriaProject = $clientCriteriaProject->request('GET', $urlGetUseCriteriaProject);
+            $criteriaProject= json_decode($responseCriteriaProject->getBody()->getContents());
+            $data['criteriaProject'] = $criteriaProject;
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get user\'s Criteria with project'], 400);
+        }
+
+        //get user's criteria with department
+        try{
+            $urlGetUseCriteriaDepartment = 'http://206.189.34.124:5000/api/group8/kpis?&employee_id='.$id_user.'&department_id=1';
+            $clientCriteriaDepartment = new Client();
+            $responseCriteriaDepartment = $clientCriteriaDepartment->request('GET', $urlGetUseCriteriaDepartment);
+            $criteriaDepartment= json_decode($responseCriteriaDepartment->getBody()->getContents());
+            $data['criteriaDepartment'] = $criteriaDepartment;
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get user\'s Criteria with department'], 400);
+        }
+
+        //get kpi user
+        try{
+            $urlUserKpi = 'https://calm-basin-00803.herokuapp.com/api/v1/users/get/'.$id_user.'?relations[]=department&project_id='.$id_project.'&from=20191001&to=20191020';
+            $clientUserKpi = new Client();
+            $responseUserKpi = $clientUserKpi->request('GET', $urlUserKpi);
+            $kpiUser= json_decode($responseUserKpi->getBody()->getContents());
+            $data['kpi'] = $kpiUser->data;
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get user\'s kpi data'], 400);
+        }
+
+        return response()->json(['success' => 1, 'data' => $data], 200);
     }
 }
