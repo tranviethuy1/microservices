@@ -82,7 +82,7 @@ class DataController extends Controller
                 $dataProjects['kpi'] = $kpiProject['kpi'];
                 $dataProjects['kpi_standard'] = $kpiProject['kpi_standard'];
                 $dataProjects['criteria'] = (array)$dataCriterion;
-                $data[$index]['result'] = $dataProjects;
+                $data[$index] = $dataProjects;
             }
         }
 
