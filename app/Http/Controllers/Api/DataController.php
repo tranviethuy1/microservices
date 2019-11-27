@@ -65,17 +65,16 @@ class DataController extends Controller
 
         // get all project kpi
         $projectController = new ProjectController();
-        $kpiProjects = $projectController->evaluateKpiAllProject();
+        $kpiProjects = $projectController->evaluateKpiAllProject()->getData('data')['data'];
         foreach ($kpiProjects as $kpiProject){
             $index++;
-            $createBy = $kpiProject->created_by;
-            $yearProject = date('Y', strtotime($createBy));
+            $completedBy = $kpiProject['complete_by'];
+            $yearProject = date('Y', strtotime($completedBy));
             if($yearInput == $yearProject){
-
                 try{
                     // get information criteria
                     $clientCriterion = new Client();
-                    $apiUrlCriterion = "http://206.189.34.124:5000/api/group8/kpis?project_id=".$kpiProject->id_project;
+                    $apiUrlCriterion = "http://206.189.34.124:5000/api/group8/kpis?project_id=".$kpiProject['id_project'];
                     $responseCriterion = $clientCriterion->request('GET', $apiUrlCriterion);
                     $dataCriterion = json_decode($responseCriterion->getBody()->getContents());
                 }catch (\Exception $e){
@@ -85,18 +84,22 @@ class DataController extends Controller
                 try{
                     // get information project
                     $clientProject = new Client();
-                    $apiUrlProject = "http://3.1.20.54/v1/projects/".$kpiProject->id_project;
+                    $apiUrlProject = "http://3.1.20.54/v1/projects/".$kpiProject['id_project'];
                     $responseProject = $clientProject->request('GET', $apiUrlProject);
-                    $dataProjects = json_decode($responseProject->getBody()->getContents());
+                    $dataProjects = (array)json_decode($responseProject->getBody()->getContents());
                 }catch (\Exception $e){
                     return response()->json(['error' => 1, 'message' => 'Something was wrong with information project '], 400);
                 }
-                $dataProjects['kpi'] = $kpiProject->kpi;
-                $dataProjects['criteria'] = $dataCriterion;
+                $dataProjects['kpi'] = $kpiProject['kpi'];
+                $dataProjects['kpi_standard'] = $kpiProject['kpi_standard'];
+                $dataProjects['criteria'] = (array)$dataCriterion;
                 $data[$index]['result'] = $dataProjects;
             }
         }
 
+        if (empty($data)){
+            return response()->json(['success' => 1, 'data' => 'Year '.$yearInput."  don't make projects "], 200);
+        }
         return response()->json(['success' => 1, 'data' => $data], 200);
 
     }
