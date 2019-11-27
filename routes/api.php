@@ -29,7 +29,19 @@ Route::get('microservice/kpi/department/{id_department}', 'Api\KpiController@eva
 
 Route::get('microservice/kpi/departments', 'Api\KpiController@evaluateKpiAllDepartments');
 
+
+//---------------------------------------------------------------------------------------
+
 //Route Manage Data Service
 Route::get('microservice/manager/kpi/department/{id_department}', 'Api\DataController@managerDepartment')
     ->middleware('checkmanagerdepartmentapi');
+
+Route::get('microservice/manager/kpi/user/{id_user}', 'Api\DataController@managerUser')
+    ->middleware('checkmanageruserapi');
+
+Route::get('microservice/manager/kpi/projects/{year}', 'Api\DataController@manageProjectKPI')->middleware('CheckInputManageKpiProject');
+
 //Route Caculate KPI of project
+Route::get('microservice/kpi/project/{id_project}', 'Api\ProjectController@evaluateKpiProject')->middleware('CheckInputKpiProject');
+
+Route::get('microservice/kpi/projects', 'Api\ProjectController@evaluateKpiAllProject');
