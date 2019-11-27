@@ -17,7 +17,7 @@ class CheckInputManageKpiProject
     {
         $year = $request->year;
         if(!isset($year) || empty($year) || !is_numeric($year)){
-            return response()->json(['error' => 'Something was wrong with request'], 400);
+            return response()->json(['error' => 'The input type is number'], 400);
         }
         return $next($request);
     }

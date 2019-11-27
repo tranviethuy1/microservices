@@ -107,8 +107,8 @@ class ProjectController extends Controller
         }
 
         // calculate kip  and compare
-        $kpiProject = $projectReality*$progressWeight + $qualityReality*$qualityWeight + $scaleReality*$scaleWeight + $technologyReality*$technologyWeight;
-        $kpiStandard = $progressWeight + $qualityWeight + $scaleReality*$scaleWeight + $technologyReality*$technologyWeight;
+        $kpiProject = round($projectReality*$progressWeight + $qualityReality*$qualityWeight + $scaleReality*$scaleWeight + $technologyReality*$technologyWeight,2);
+        $kpiStandard = round($progressWeight + $qualityWeight + $scaleReality*$scaleWeight + $technologyReality*$technologyWeight,2);
 
         $status = '';
 
