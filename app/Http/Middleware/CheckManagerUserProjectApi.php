@@ -4,7 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 
-class CheckManagerUserApi
+class CheckManagerUserProjectApi
 {
     /**
      * Handle an incoming request.
@@ -16,7 +16,11 @@ class CheckManagerUserApi
     public function handle($request, Closure $next)
     {
         $id_user = $request->id_user;
+        $id_project = $request->id_project;
         if(!isset($id_user) || empty($id_user)){
+            return response()->json(['error' => 'Something was wrong with request'], 400);
+        }
+        if(!isset($id_project) || empty($id_project)){
             return response()->json(['error' => 'Something was wrong with request'], 400);
         }
         return $next($request);
