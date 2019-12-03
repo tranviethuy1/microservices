@@ -65,6 +65,7 @@ class Kernel extends HttpKernel
         'checkmanagerdepartmentapi' => \App\Http\Middleware\CheckManageDepartmentApi::class,
         'CheckInputKpiProject' => \App\Http\Middleware\CheckInputKpiProject::class,
         'CheckInputManageKpiProject' => \App\Http\Middleware\CheckInputManageKpiProject::class,
+        'CheckInputAllKpiProject' => \App\Http\Middleware\CheckInputAllKpiProject::class,
     ];
 
     /**

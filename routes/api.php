@@ -42,3 +42,5 @@ Route::get('microservice/manager/kpi/projects/{year}', 'Api\DataController@manag
 Route::get('microservice/kpi/project/{id_project}', 'Api\ProjectController@evaluateKpiProject')->middleware('CheckInputKpiProject');
 
 Route::get('microservice/kpi/projects', 'Api\ProjectController@evaluateKpiAllProject');
+
+Route::get('microservice/kpi/projects/{year}', 'Api\ProjectController@evaluateKpiAllProjectYear')->middleware('CheckInputAllKpiProject');
