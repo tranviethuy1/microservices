@@ -120,15 +120,15 @@ class DataController extends Controller
         }
 
         //get user's criteria with project
-//        try{
-//            $urlGetUseCriteriaProject = 'http://206.189.34.124:5000/api/group8/kpis?project_id='.$id_project.'&employee_id='.$id_user;
-//            $clientCriteriaProject = new Client();
-//            $responseCriteriaProject = $clientCriteriaProject->request('GET', $urlGetUseCriteriaProject);
-//            $criteriaProject= json_decode($responseCriteriaProject->getBody()->getContents());
-//            $data['criteriaProject'] = $criteriaProject;
-//        }catch (\Exception $e){
-//            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get user\'s Criteria with project'], 400);
-//        }
+        try{
+            $urlGetUseCriteriaProject = 'http://206.189.34.124:5000/api/group8/kpis?project_id='.$id_project.'&employee_id='.$id_user;
+            $clientCriteriaProject = new Client();
+            $responseCriteriaProject = $clientCriteriaProject->request('GET', $urlGetUseCriteriaProject);
+            $criteriaProject= json_decode($responseCriteriaProject->getBody()->getContents());
+            $data['criteriaProject'] = $criteriaProject;
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get user\'s Criteria with project'], 400);
+        }
 
         //get kpi user
         try{
