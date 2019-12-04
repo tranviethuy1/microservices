@@ -40,6 +40,34 @@ class ProjectController extends Controller
         }
     }
 
+    // List kpi of all projects with year
+    public function evaluateKpiAllProjectYear(Request $request){
+        $data = array();
+        try{
+            $year = $request->year;
+            $clientInfo = new Client();
+            $apiUrlProjects = "http://3.1.20.54/v1/projects";
+            $responseProject = $clientInfo->request('GET', $apiUrlProjects);
+            $dataProjects = json_decode($responseProject->getBody()->getContents());
+            $projects = $dataProjects->results;
+            foreach ($projects as $project){
+                if(isset($project->completed_time)){
+                    if(date('Y',$project->created_time) == $year){
+                        $data[]= $this->getDataKpiProject($project->id);
+                    }
+                }
+            }
+            if (empty($data)){
+                $data = array(
+                    'result'=>"Don't have project in ".$year." "
+                );
+            }
+            return response()->json(['success' => 1, 'data' => $data], 200);
+        }catch (\Exception $e){
+            return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of departments']], 400);
+        }
+    }
+
     // Get data KPI
     public function getDataKpiProject($idProject){
         // get criterion in project + default 4
@@ -63,18 +91,23 @@ class ProjectController extends Controller
             $responseProject = $clientProject->request('GET', $apiUrlProject);
             $dataProjects = json_decode($responseProject->getBody()->getContents());
             $nameProject = $dataProjects->name;
-            $timeLate = $dataProjects->completed_time - $dataProjects->deadline;
-            $timeStandard = $dataProjects->deadline - $dataProjects->created_time;
-            $createTime = $dataProjects->created_by;
-            $completeTime = $dataProjects->completed_time;
-            if($timeLate < 0){
-                $projectReality = round((abs($timeLate)/$timeStandard)+1,2);
-            }elseif($timeLate ==0){
-                $projectReality = 1;
+            if(isset($dataProjects->completed_time)){
+                $timeLate = $dataProjects->completed_time - $dataProjects->deadline;
+                $timeStandard = $dataProjects->deadline - $dataProjects->created_time;
+                $createTime = $dataProjects->created_by;
+                $completeTime = $dataProjects->completed_time;
+                if($timeLate < 0){
+                    $projectReality = round((abs($timeLate)/$timeStandard)+1,2);
+                }elseif($timeLate ==0){
+                    $projectReality = 1;
+                }else{
+                    $projectReality = round(abs($timeLate)/$timeStandard,2);
+                }
+                $technologyReality = 0.1*$dataProjects->technique_index;
             }else{
-                $projectReality = round(abs($timeLate)/$timeStandard,2);
+                return response()->json(['error' => 1, 'message' => "Project wasn't finished "], 400);
             }
-            $technologyReality = 0.1*$dataProjects->technique_index;
+
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => 'Something was wrong with api get project information '], 400);
         }
@@ -91,14 +124,16 @@ class ProjectController extends Controller
             $totalTimeStandard = 0;
             $resultTasks = $dataTaskProject->results;
             foreach ($resultTasks as $result){
-                $totalTimeExecute += $result->completed_time - $result->created_time;
-                if(isset($result->deadline)){
-                    $totalTimeStandard += $result->deadline - $result->created_time;
-                }else{
-                    $totalTimeStandard += $result->completed_time - $result->created_time;
+                if(isset($result->completed_time)){
+                    $totalTimeExecute += $result->completed_time - $result->created_time;
+                    if(isset($result->deadline)){
+                        $totalTimeStandard += $result->deadline - $result->created_time;
+                    }else{
+                        $totalTimeStandard += $result->completed_time - $result->created_time;
+                    }
+                    $totalLevel += $result->level;
+                    $totalTask++;
                 }
-                $totalLevel += $result->level;
-                $totalTask++;
             }
             $qualityReality = round($totalTimeStandard/$totalTimeExecute,2);
             $scaleReality = round($totalLevel/$totalTask,2)*0.1;
