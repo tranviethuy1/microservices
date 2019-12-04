@@ -90,18 +90,22 @@ class ProjectController extends Controller
             $apiUrlProject = "http://3.1.20.54/v1/projects/".$idProject;
             $responseProject = $clientProject->request('GET', $apiUrlProject);
             $dataProjects = json_decode($responseProject->getBody()->getContents());
-            $nameProject = $dataProjects->name;
+            if (isset($dataProjects->name)){
+                $nameProject = $dataProjects->name;
+            }else{
+                $nameProject = '';
+            }
             if(isset($dataProjects->completed_time)){
-                $timeLate = $dataProjects->completed_time - $dataProjects->deadline;
-                $timeStandard = $dataProjects->deadline - $dataProjects->created_time;
-                $createTime = $dataProjects->created_by;
+                $timeLate = abs($dataProjects->completed_time - $dataProjects->deadline);
+                $timeStandard = abs($dataProjects->deadline - $dataProjects->created_time);
+                $createTime = $dataProjects->created_time;
                 $completeTime = $dataProjects->completed_time;
                 if($timeLate < 0){
-                    $projectReality = round((abs($timeLate)/$timeStandard)+1,2);
+                    $projectReality = round(($timeLate/$timeStandard)+1,2);
                 }elseif($timeLate ==0){
                     $projectReality = 1;
                 }else{
-                    $projectReality = round(abs($timeLate)/$timeStandard,2);
+                    $projectReality = round(($timeLate/$timeStandard),2);
                 }
                 $technologyReality = 0.1*$dataProjects->technique_index;
             }else{
@@ -131,12 +135,20 @@ class ProjectController extends Controller
                     }else{
                         $totalTimeStandard += $result->completed_time - $result->created_time;
                     }
-                    $totalLevel += $result->level;
-                    $totalTask++;
                 }
+                $totalLevel += $result->level;
+                $totalTask++;
             }
-            $qualityReality = round($totalTimeStandard/$totalTimeExecute,2);
-            $scaleReality = round($totalLevel/$totalTask,2)*0.1;
+            if($totalTimeExecute == 0 && $totalTimeStandard == 0){
+                $qualityReality = 0;
+            }else{
+                $qualityReality = round($totalTimeStandard/$totalTimeExecute,2);
+            }
+            if($totalLevel == 0 && $totalTask == 0){
+                $scaleReality = 0;
+            }else{
+                $scaleReality = round($totalLevel/$totalTask,2)*0.1;
+            }
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => 'Something was wrong with api get task information in project'], 400);
         }
@@ -161,8 +173,8 @@ class ProjectController extends Controller
             'kpi'=>$kpiProject,
             'kpi_standard'=>$kpiStandard,
             'status'=>$status,
-            'created_by'=>date("Y-m-d H:i:s", $createTime),
-            'complete_by'=>date("Y-m-d H:i:s", $completeTime)
+            'created_time'=>date("Y-m-d H:i:s", $createTime),
+            'complete_time'=>date("Y-m-d H:i:s", $completeTime)
         );
         return $data;
     }
