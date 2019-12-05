@@ -33,7 +33,7 @@ class CheckInputKpiProject
             }
         }
         if(!in_array($projectId,$idProjects)){
-            return response()->json(['error' => 'IdProject is not correct'], 400);
+            return response()->json(['error' => 'You can input id_project which have complete_time '], 400);
         }
         return $next($request);
     }

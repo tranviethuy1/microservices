@@ -68,7 +68,7 @@ class DataController extends Controller
         $kpiProjects = $projectController->evaluateKpiAllProject()->getData('data')['data'];
         foreach ($kpiProjects as $kpiProject){
             $index++;
-            $completedBy = $kpiProject['complete_by'];
+            $completedBy = $kpiProject['complete_time'];
             $yearProject = date('Y', strtotime($completedBy));
             if($yearInput == $yearProject){
                 try{
