@@ -17,6 +17,9 @@ use Illuminate\Http\Request;
 Route::get('microservice/manager/kpi/department/{id_department}', 'Api\DataController@managerDepartment')
     ->middleware('checkmanagerdepartmentapi');
 
+Route::get('microservice/manager/kpi/departments', 'Api\DataController@managerDepartments')
+    ->middleware('checkmanagerdepartments');
+
 Route::get('microservice/manager/kpi/user/{id_user}', 'Api\DataController@managerUserProject')
     ->middleware('checkmanageruserprojectapi');
 

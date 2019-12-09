@@ -55,6 +55,71 @@ class DataController extends Controller
         return response()->json(['success' => 1, 'data' => $data], 200);
     }
 
+    public function managerDepartments(Request $request){
+        $data = [];
+        $ids = [];
+        //get all department in system
+        try{
+            $urlGetAllDepartment = 'http://206.189.34.124:5000/api/group8/departments';
+            $clientAllDepartment = new Client();
+            $response = $clientAllDepartment->request('GET', $urlGetAllDepartment);
+            $departments = json_decode($response->getBody()->getContents())->departments;
+            foreach ($departments as $department){
+                $ids[] = $department->id;
+            }
+        }catch (\Exception $e) {
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get department\'s information'], 400);
+        }
+
+        //loop
+        foreach ($ids as $id_department){
+        // Get department's information
+
+        try{
+            $urlGetDepartmentInfo = 'http://206.189.34.124:5000/api/group8/departments/'.$id_department;
+            $clientInfo = new Client();
+            $response = $clientInfo->request('GET', $urlGetDepartmentInfo);
+            $department= json_decode($response->getBody()->getContents());
+            $data[$id_department]['department'] = $department->department;
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get department\'s information'], 400);
+        }
+        // Get department's criteria
+        try{
+            $urlGetDepartmentCriteria = 'http://206.189.34.124:5000/api/group8/kpis?department_id='.$id_department;
+            $clientCriteria = new Client();
+            $response = $clientCriteria->request('GET', $urlGetDepartmentCriteria);
+            $criteria = json_decode($response->getBody()->getContents());
+            $data[$id_department]['criteria'] = $criteria;
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get criteria\'s information'], 400);
+        }
+
+        //get kpi of department
+        try{
+            $urlGetDepartmentKpi = 'http://18.217.21.235:8083/api/v1/departmentKPI/getDepartmentKPIAllYear?departmentId='.$id_department;
+            $clientKpi = new Client();
+            $response = $clientKpi->request('GET', $urlGetDepartmentKpi);
+            $kpiAndTime = json_decode($response->getBody()->getContents());
+            $kpi = [];
+            $kpiYears = json_decode(json_encode($kpiAndTime->data->timeAndKPI), true);
+            $urlGetDepartmentKpiMonthInYear = 'http://18.217.21.235:8083/api/v1/departmentKPI/getDepartmentKPIAllMonthOfYear?departmentId='.$id_department.'&year=';
+            foreach ($kpiYears as $year => $kpiYear){
+                $urlInLoop = $urlGetDepartmentKpiMonthInYear.$year;
+                $record = [] ;
+                $record['kpi'] = $kpiYear;
+                $responseInLoop = $clientKpi->request('GET', $urlInLoop);
+                $record['detail'] = json_decode($responseInLoop->getBody()->getContents())->data->timeAndKPI;
+                $kpi[$year] = $record;
+            }
+            $data[$id_department]['kpi'] = $kpi;
+        }catch (\Exception $e){
+            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get kpi of department'], 400);
+        }
+        }
+        return response()->json(['success' => 1, 'data' => $data], 200);
+    }
+
     // Manage project kpi
 
     public function manageProjectKPI(Request $request){
