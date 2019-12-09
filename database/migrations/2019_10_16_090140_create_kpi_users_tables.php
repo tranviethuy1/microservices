@@ -76,6 +76,13 @@ class CreateKpiUsersTables extends Migration
             $table->integer('year');
             $table->timestamps();
         });
+
+        Schema::create('role', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->string('id_employee');
+            $table->integer('access');
+            $table->timestamps();
+        });
     }
 
     /**
@@ -98,5 +105,7 @@ class CreateKpiUsersTables extends Migration
         Schema::dropIfExists('department');
 
         Schema::dropIfExists('kpi_department');
+
+        Schema::dropIfExists('role');
     }
 }
