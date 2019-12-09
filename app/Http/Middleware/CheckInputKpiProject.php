@@ -17,6 +17,17 @@ class CheckInputKpiProject
     public function handle($request, Closure $next)
     {
         $projectId = $request->id_project;
+        $token = $request->token;
+
+        if(!isset($token) || empty($token)){
+            return response()->json(['error' => 'You do not have the role'], 401 );
+        }else{
+            $role = \App\Role::where('id_employee', $token)->first();
+            if(!$role){
+                return response()->json(['error' => 'You do not have the role'], 401 );
+            }
+        }
+
         if(empty($projectId)){
             return response()->json(['error' => 'IdProject is required'], 400);
         }

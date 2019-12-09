@@ -18,6 +18,16 @@ class CheckEvaluateKpiUser
         $user_id = $request->id_user;
         $month = $request->month;
         $year = $request->year;
+        $token = $request->token;
+
+        if(!isset($token) || empty($token)){
+            return response()->json(['error' => 'You do not have the role'], 401 );
+        }else{
+            $role = \App\Role::where('id_employee', $token)->first();
+            if(!$role){
+                return response()->json(['error' => 'You do not have the role'], 401 );
+            }
+        }
 
         if(!isset($month) || empty($month)){
             return response()->json(['error' => 'Param "month" is required'], 200);

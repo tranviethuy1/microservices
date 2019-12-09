@@ -3,8 +3,15 @@
   <component name="ChangeListManager">
     <list default="true" id="34658342-01ec-4063-8c6e-e5973eefa4c8" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/migrations/2019_10_16_090140_create_kpi_users_tables.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/migrations/2019_10_16_090140_create_kpi_users_tables.php" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/database/seeds/DataSeeder.php" beforeDir="false" afterPath="$PROJECT_DIR$/database/seeds/DataSeeder.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/CheckEvaluateKpiDepartment.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/CheckEvaluateKpiDepartment.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/CheckEvaluateKpiUser.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/CheckEvaluateKpiUser.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/CheckInputAllKpiProject.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/CheckInputAllKpiProject.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/CheckInputKpiProject.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/CheckInputKpiProject.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/CheckInputManageKpiProject.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/CheckInputManageKpiProject.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/CheckManageDepartmentApi.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/CheckManageDepartmentApi.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/CheckManagerDepartments.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/CheckManagerDepartments.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/CheckManagerUserApi.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/CheckManagerUserApi.php" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/Http/Middleware/CheckManagerUserProjectApi.php" beforeDir="false" afterPath="$PROJECT_DIR$/app/Http/Middleware/CheckManagerUserProjectApi.php" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -173,7 +180,7 @@
       <workItem from="1575351580404" duration="6592000" />
       <workItem from="1575480513447" duration="258000" />
       <workItem from="1575603098079" duration="1945000" />
-      <workItem from="1575873050033" duration="9142000" />
+      <workItem from="1575873050033" duration="9944000" />
     </task>
     <servers />
   </component>

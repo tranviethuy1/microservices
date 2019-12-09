@@ -15,7 +15,18 @@ class CheckManagerUserApi
      */
     public function handle($request, Closure $next)
     {
+        $token = $request->token;
         $id_user = $request->id_user;
+
+        if(!isset($token) || empty($token)){
+            return response()->json(['error' => 'You do not have the role'], 401 );
+        }else{
+            $role = \App\Role::where('id_employee', $token)->first();
+            if(!$role){
+                return response()->json(['error' => 'You do not have the role'], 401 );
+            }
+        }
+
         if(!isset($id_user) || empty($id_user)){
             return response()->json(['error' => 'Something was wrong with request'], 400);
         }
