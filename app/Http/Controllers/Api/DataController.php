@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\DB;
 class DataController extends Controller
 {
     public function managerDepartment(Request $request){
@@ -59,40 +60,40 @@ class DataController extends Controller
 
     public function manageProjectKPI(Request $request){
         $yearInput = $request->year;
-
         $data = array();
         $index = 0;
-
         // get all project kpi
         $projectController = new ProjectController();
+        // get all value of database
         $kpiProjects = $projectController->evaluateKpiAllProject()->getData('data')['data'];
         foreach ($kpiProjects as $kpiProject){
             $index++;
             $completedBy = $kpiProject['complete_time'];
+            $reality = $kpiProject['reality'];
             $yearProject = date('Y', strtotime($completedBy));
             if($yearInput == $yearProject){
-                try{
-                    // get information criteria
-                    $clientCriterion = new Client();
-                    $apiUrlCriterion = "http://206.189.34.124:5000/api/group8/kpis?project_id=".$kpiProject['id_project'];
-                    $responseCriterion = $clientCriterion->request('GET', $apiUrlCriterion);
-                    $dataCriterion = json_decode($responseCriterion->getBody()->getContents());
-                }catch (\Exception $e){
-                    return response()->json(['error' => 1, 'message' => 'Something was wrong with api get criteria '], 400);
-                }
-
                 try{
                     // get information project
                     $clientProject = new Client();
                     $apiUrlProject = "http://3.1.20.54/v1/projects/".$kpiProject['id_project'];
                     $responseProject = $clientProject->request('GET', $apiUrlProject);
                     $dataProjects = (array)json_decode($responseProject->getBody()->getContents());
+                    // get information criteria
+                    $clientCriterion = new Client();
+                    $apiUrlCriterion = "http://206.189.34.124:5000/api/group8/kpis?project_id=".$kpiProject['id_project'];
+                    $responseCriterion = $clientCriterion->request('GET', $apiUrlCriterion);
+                    $dataCriterion = json_decode($responseCriterion->getBody()->getContents());
                 }catch (\Exception $e){
-                    return response()->json(['error' => 1, 'message' => 'Something was wrong with information project '], 400);
+                    $dataProjects = (array)DB::table('kpi_fake_tables')->where('project_id',$kpiProject['id_project'])->first();
+                    $dataCriterionDb = DB::table('project_criteria')->where('criteria_id',$kpiProject['id_criteria'])->first();
+                    $dataCriterion = json_decode($dataCriterionDb->data);
+                    // return response()->json(['error' => 1, 'message' => 'Something was wrong with api get criteria '], 400);
                 }
+
                 $dataProjects['kpi'] = $kpiProject['kpi'];
                 $dataProjects['kpi_standard'] = $kpiProject['kpi_standard'];
                 $dataProjects['criteria'] = (array)$dataCriterion;
+                $dataProjects['reality'] = (array)$reality;
                 $data[$index] = $dataProjects;
             }
         }
