@@ -57,7 +57,7 @@ class ProjectController extends Controller
             $dataProjects = json_decode($responseProject->getBody()->getContents());
             $projects = $dataProjects->results;
             foreach ($projects as $project){
-                if(isset($project->completed_time)){
+                if($project->completed_time !== null){
                     $data[]= $this->getDataKpiProject($project->id);
                 }
             }
@@ -94,21 +94,45 @@ class ProjectController extends Controller
             $projects = $dataProjects->results;
             $kpiMax = 0;
             foreach ($projects as $project){
-                if(isset($project->completed_time)){
-                    if($this->getDataKpiProject($project->id)['kpi'] > $kpiMax){
-                        $kpiMax = $this->getDataKpiProject($project->id)['kpi'];
-                        $data = array();
-                        $data[] = $this->getDataKpiProject($project->id);
-                    }elseif($this->getDataKpiProject($project->id)['kpi'] == $kpiMax){
+                if($project->completed_time !== null){
+                    if($this->getDataKpiProject($project->id)['kpi'] >= $kpiMax){
+                        if($this->getDataKpiProject($project->id)['kpi'] > $kpiMax){
+                            $data = array();
+                        }
                         $kpiMax = $this->getDataKpiProject($project->id)['kpi'];
                         $data[] = $this->getDataKpiProject($project->id);
                     }
                 }
             }
-            return response()->json(['success' => 1, 'data' => $data], 200);
         }catch (\Exception $e){
-            return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of departments']], 400);
+            $kpiMax = 0;
+            $kpiProjects = DB::table('kpi_fake_tables')->get();
+            foreach ($kpiProjects as $kpiProject){
+                $kpiProject = (array)$kpiProject;
+                if($kpiProject['complete_time'] !== null){
+                    if((float)$kpiProject['kpi']>=$kpiMax){
+                        if((float)$kpiProject['kpi'] > $kpiMax){
+                            $data = array();
+                        }
+                        $kpiMax = $kpiProject['kpi'];
+                        $data[] = array(
+                            'id'=>$kpiProject['id'],
+                            'project_id'=>$kpiProject['project_id'],
+                            'criteria_id'=>$kpiProject['criteria_id'],
+                            'name'=>$kpiProject['name'],
+                            'kpi'=>$kpiProject['kpi'],
+                            'kpi_standard'=>$kpiProject['kpi_standard'],
+                            'reality'=>json_decode($kpiProject['reality']),
+                            'status'=>$kpiProject['status'],
+                            'created_time'=>$kpiProject['created_time'],
+                            'complete_time'=>$kpiProject['complete_time'],
+                        );
+                    }
+                }
+            }
+            // return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of departments']], 400);
         }
+        return response()->json(['success' => 1, 'data' => $data], 200);
     }
 
     // Get project KPI min
@@ -130,19 +154,47 @@ class ProjectController extends Controller
             // get all kpi project kpi min
             $kpiMin = $this->getDataKpiProject($projectsKPI[0]->id)['kpi'];
             for ($i =0 ;$i<count($projectsKPI);$i++){
-                if($this->getDataKpiProject($projectsKPI[$i]->id)['kpi'] < $kpiMin){
-                    $kpiMin = $this->getDataKpiProject($projectsKPI[$i]->id)['kpi'];
-                    $data = array();
-                    $data[] = $this->getDataKpiProject($projectsKPI[$i]->id);
-                }elseif ($this->getDataKpiProject($projectsKPI[$i]->id)['kpi'] == $kpiMin){
+                if($this->getDataKpiProject($projectsKPI[$i]->id)['kpi'] <= $kpiMin){
+                    if($this->getDataKpiProject($projectsKPI[$i]->id)['kpi'] < $kpiMin){
+                        $data = array();
+                    }
                     $kpiMin = $this->getDataKpiProject($projectsKPI[$i]->id)['kpi'];
                     $data[] = $this->getDataKpiProject($projectsKPI[$i]->id);
                 }
             }
-            return response()->json(['success' => 1, 'data' => $data], 200);
         }catch (\Exception $e){
-            return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of departments']], 400);
+            $kpiProjects = DB::table('kpi_fake_tables')->get();
+            $projectsKPI = array();
+            foreach ($kpiProjects as $kpiProject){
+                if($kpiProject->complete_time !== null){
+                    $projectsKPI[] = (array)$kpiProject;
+                }
+            }
+
+            $kpiMin = $projectsKPI[0]['kpi'];
+            for ($i =0 ;$i<count($projectsKPI);$i++){
+                if($projectsKPI[$i]['kpi'] <= $kpiMin){
+                    if($projectsKPI[$i]['kpi'] < $kpiMin){
+                        $data = array();
+                    }
+                    $kpiMin = $projectsKPI[$i]['kpi'];
+                    $data[] = array(
+                        'id'=>$projectsKPI[$i]['id'],
+                        'project_id'=>$projectsKPI[$i]['project_id'],
+                        'criteria_id'=>$projectsKPI[$i]['criteria_id'],
+                        'name'=>$projectsKPI[$i]['name'],
+                        'kpi'=>$projectsKPI[$i]['kpi'],
+                        'kpi_standard'=>$projectsKPI[$i]['kpi_standard'],
+                        'reality'=>json_decode($projectsKPI[$i]['reality']),
+                        'status'=>$projectsKPI[$i]['status'],
+                        'created_time'=>$projectsKPI[$i]['created_time'],
+                        'complete_time'=>$projectsKPI[$i]['complete_time'],
+                    );
+                }
+            }
+            // return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of departments']], 400);
         }
+        return response()->json(['success' => 1, 'data' => $data], 200);
     }
 
 
@@ -158,21 +210,42 @@ class ProjectController extends Controller
             $dataProjects = json_decode($responseProject->getBody()->getContents());
             $projects = $dataProjects->results;
             foreach ($projects as $project){
-                if(isset($project->completed_time)){
+                if($project->completed_time !== null){
                     if(date('Y',$project->created_time) == $year){
                         $data[]= $this->getDataKpiProject($project->id);
                     }
                 }
             }
-            if (empty($data)){
-                $data = array(
-                    'result'=>"Don't have project in ".$year." "
-                );
-            }
-            return response()->json(['success' => 1, 'data' => $data], 200);
         }catch (\Exception $e){
-            return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of project']], 400);
+            $kpiProjects = DB::table('kpi_fake_tables')->get();
+            foreach ($kpiProjects as $kpiProject){
+                $kpiProject = (array)$kpiProject;
+                if($kpiProject['complete_time'] !== null){
+                    if(date('Y',strtotime($kpiProject['created_time'])) == $year){
+                        $data[]= array(
+                            'id'=>$kpiProject['id'],
+                            'project_id'=>$kpiProject['project_id'],
+                            'criteria_id'=>$kpiProject['criteria_id'],
+                            'name'=>$kpiProject['name'],
+                            'kpi'=>$kpiProject['kpi'],
+                            'kpi_standard'=>$kpiProject['kpi_standard'],
+                            'reality'=>json_decode($kpiProject['reality']),
+                            'status'=>$kpiProject['status'],
+                            'created_time'=>$kpiProject['created_time'],
+                            'complete_time'=>$kpiProject['complete_time'],
+                        );
+                    }
+                }
+            }
+            // return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of project']], 400);
         }
+
+        if (empty($data)){
+            $data = array(
+                'result'=>"Don't have project in ".$year." "
+            );
+        }
+        return response()->json(['success' => 1, 'data' => $data], 200);
     }
 
     // Get data KPI
