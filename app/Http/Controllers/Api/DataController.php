@@ -212,6 +212,7 @@ class DataController extends Controller
     public function managerUser(Request $request){
         $id_user = $request->id_user;
         $data = [];
+        $criteria = [];
         // Get user's information
         try{
             $urlGetUserInfo = 'https://dsd05-dot-my-test-project-252009.appspot.com/user/getUserInfo?id='.$id_user;
@@ -229,7 +230,20 @@ class DataController extends Controller
             $clientUserKpi = new Client();
             $responseUserKpi = $clientUserKpi->request('GET', $urlUserKpi);
             $kpiUser= json_decode($responseUserKpi->getBody()->getContents());
-            $data['kpi'] = $kpiUser->data->projects;
+            $projects = $kpiUser->data->projects;
+
+            // get criteria of project
+            foreach ($projects as $project){
+                $id_project = $project->id;
+                $urlCriteriaUserProject = 'http://206.189.34.124:5000/api/group8/kpis?project_id='.$id_project.'&employee_id='.$id_user;
+                $clientCriteriaUserProject = new Client();
+                $response = $clientCriteriaUserProject->request('GET', $urlCriteriaUserProject);
+                $userCriteria = json_decode($response->getBody()->getContents());
+                $criteria[$id_project] = $userCriteria->criterias;
+            }
+
+            $data['kpi'] = $projects;
+            $data['criteria'] = $criteria;
         }catch (\Exception $e){
             return response()->json(['error' => 1, 'message' => 'Something was wrong with api get user\'s kpi data'], 400);
         }
