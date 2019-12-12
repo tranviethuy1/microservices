@@ -17,7 +17,7 @@ class CreateKpiProjectUpdate extends Migration
             $table->bigIncrements('id');
             $table->string('id_project');
             $table->string('id_criteria');
-            $table->json('data');
+            $table->longText('data');
             $table->timestamps();
         });
     }

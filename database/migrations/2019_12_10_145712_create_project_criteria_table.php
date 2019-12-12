@@ -16,7 +16,7 @@ class CreateProjectCriteriaTable extends Migration
         Schema::create('project_criteria', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->string('criteria_id');
-            $table->json('data');
+            $table->longText('data');
             $table->timestamps();
         });
     }
