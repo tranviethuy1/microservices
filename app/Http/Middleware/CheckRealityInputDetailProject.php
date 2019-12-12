@@ -20,7 +20,32 @@ class CheckRealityInputDetailProject
     {
         $requestBody = request()->json()->all();
         $dataSaved = $requestBody['result'];
-
+        $formatInput = array(
+            'error'=>'Something input is wrong ',
+            'format_correct'=>array(
+                'id_project'=>'',
+                'id_criteria'=>'',
+                'result'=>[
+                    [
+                        'reality'=>'',
+                        'ratio'=>'',
+                        'name'=>''
+                    ],
+                    [
+                        'reality'=>'',
+                        'ratio'=>'',
+                        'name'=>''
+                    ]
+                ]
+            )
+        );
+        // check format input
+        foreach ($dataSaved as $value){
+            if(!isset($value['reality']) || !isset($value['ratio']) || !isset($value['name'])){
+                return response()->json(['error' => 1, 'message' => $formatInput],400);
+                break;
+            }
+        }
 
         if(!isset($requestBody['id_project'])){
             // check empty project id
