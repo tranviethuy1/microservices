@@ -14,5 +14,7 @@ class DatabaseSeeder extends Seeder
          $this->call(DataSeeder::class);
          $this->call(KPISeeder::class);
          $this->call(CriteriaSeeder::class);
+         $this->call(DepartmentInfo::class);
+         $this->call(UserSeeder::class);
     }
 }
