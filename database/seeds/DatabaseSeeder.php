@@ -12,5 +12,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
          $this->call(DataSeeder::class);
+         $this->call(KPISeeder::class);
+         $this->call(CriteriaSeeder::class);
     }
 }
