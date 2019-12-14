@@ -304,9 +304,38 @@ class ProjectController extends Controller
 
         // get criterion in project + default 4
         $dataCriterion = $this->getContentCriteriaProject($idProject);
-        $criterionInfos= $dataCriterion->criterias;
         $criteriaId = $dataCriterion->id;
-        //
+        $criterionInfos= $dataCriterion->criterias;
+        // check criteria in database different when call if different delete data in database -> need update
+        $isDeleteDatabase = false;
+        $getNameCriteriaApi = array();
+        foreach ($criterionInfos as $criterionInfo){
+            array_push($getNameCriteriaApi,$criterionInfo->name);
+        }
+        $defaultNameCriteriaSavedDb = array();
+        $criteriaInfoDb = DB::table('kpi_project_update')->where('id_project',$idProject)->first();
+        if($criteriaInfoDb !== null){
+            $criteriaDbs = json_decode($criteriaInfoDb->data);
+            foreach ($criteriaDbs as $criteriaDb){
+                array_push($defaultNameCriteriaSavedDb,$criteriaDb->name);
+            }
+        }
+
+        $compareArrayDb1 = array_diff($getNameCriteriaApi,$defaultNameCriteriaSavedDb);
+        $compareArrayDb2 = array_diff($defaultNameCriteriaSavedDb,$getNameCriteriaApi);
+        if(count($criterionInfos) == count($defaultNameCriteriaSavedDb)){
+            if (!(empty($compareArrayDb1) && empty($compareArrayDb2))){
+                $isDeleteDatabase = true;
+            }
+        }else{
+            $isDeleteDatabase = true;
+        }
+
+        if($isDeleteDatabase){
+            DB::table('kpi_project_update')->where('id_project',$idProject)->delete();
+        }
+
+        // Get reality value
         $addCriteria = array();
         $progressWeight = 0;
         $qualityWeight = 0;
@@ -353,8 +382,8 @@ class ProjectController extends Controller
                     break;
                 default:
                     // check in database to get value data to get value which updated
-                    $kpiUpdateProject = DB::table("kpi_project_update")->where('id_project',$idProject)->where('id_criteria',$criteriaId)->first();
-                    if($kpiUpdateProject !== null){
+                    if(!$isDeleteDatabase){
+                        $kpiUpdateProject = DB::table("kpi_project_update")->where('id_project',$idProject)->where('id_criteria',$criteriaId)->first();
                         $dataCriteriasSaved = json_decode($kpiUpdateProject->data);
                         foreach ($dataCriteriasSaved as $dataCriteriaSaved){
                             if ($dataCriteriaSaved->name == $criterionInfo->name){
@@ -543,4 +572,5 @@ class ProjectController extends Controller
         }
         return $check;
     }
+
 }
