@@ -72,7 +72,7 @@ class DataController extends Controller
             $reality = $kpiProject['reality'];
             $yearProject = date('Y', strtotime($completedBy));
             if($yearInput == $yearProject){
-                try{
+                if($projectController->checkConnectAllApi()){
                     // get information project
                     $clientProject = new Client();
                     $apiUrlProject = "http://3.1.20.54/v1/projects/".$kpiProject['id_project'];
@@ -83,13 +83,11 @@ class DataController extends Controller
                     $apiUrlCriterion = "http://206.189.34.124:5000/api/group8/kpis?project_id=".$kpiProject['id_project'];
                     $responseCriterion = $clientCriterion->request('GET', $apiUrlCriterion);
                     $dataCriterion = json_decode($responseCriterion->getBody()->getContents());
-                }catch (\Exception $e){
+                }else{
                     $dataProjects = (array)DB::table('kpi_fake_tables')->where('project_id',$kpiProject['id_project'])->first();
                     $dataCriterionDb = DB::table('project_criteria')->where('criteria_id',$kpiProject['id_criteria'])->first();
                     $dataCriterion = json_decode($dataCriterionDb->data);
-                    // return response()->json(['error' => 1, 'message' => 'Something was wrong with api get criteria '], 400);
                 }
-
                 $dataProjects['kpi'] = $kpiProject['kpi'];
                 $dataProjects['kpi_standard'] = $kpiProject['kpi_standard'];
                 $dataProjects['criteria'] = (array)$dataCriterion;

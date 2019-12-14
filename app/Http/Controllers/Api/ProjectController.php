@@ -39,30 +39,33 @@ class ProjectController extends Controller
         }
 
         // get information kpi when connect success
-        try{
-            $data = $this->getDataKpiProject($projectId);
+        if($this->checkConnectAllApi()){
+            if($this->checkIdProjectCriteria($projectId)){
+                $data = $this->getDataKpiProject($projectId);
+            }else{
+                return response()->json(['error' => ['message' => "Project don't have criteria to get value "]], 200);
+            }
             return response()->json(['success' => 1, 'data' => $data], 200);
-        }catch (\Exception $e){
-            return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of project']], 200);
+        }else{
+            return response()->json(['error' => ['message' => 'Error connect other api']], 200);
         }
     }
 
     // List kpi of all projects
     public function evaluateKpiAllProject(){
         $data = array();
-        try{
-            $clientInfo = new Client();
-            $apiUrlProjects = "http://3.1.20.54/v1/projects";
-            $responseProject = $clientInfo->request('GET', $apiUrlProjects);
-            $dataProjects = json_decode($responseProject->getBody()->getContents());
+        if($this->checkConnectAllApi()){
+            $dataProjects = $this->getContentApiAllProject();
             $projects = $dataProjects->results;
             foreach ($projects as $project){
                 if($project->completed_time !== null){
-                    $data[]= $this->getDataKpiProject($project->id);
+                    if($this->checkIdProjectCriteria($project->id)){
+                        $data[]= $this->getDataKpiProject($project->id);
+                    }
                 }
             }
             return response()->json(['success' => 1, 'data' => $data], 200);
-        }catch (\Exception $e){
+        }else{
             // get data from database when error connect project
             $allKpiProjects = DB::table('kpi_fake_tables')->get();
             foreach ($allKpiProjects as $kpiProject){
@@ -78,7 +81,6 @@ class ProjectController extends Controller
                     'complete_time'=>$kpiProject->complete_time
                 );
             }
-//            return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of project']], 400);
         }
         return response()->json(['success' => 1, 'data' => $data], 200);
     }
@@ -86,25 +88,24 @@ class ProjectController extends Controller
     // Get project KPI max
     public function evaluateKpiMaxProject(){
         $data = array();
-        try{
-            $clientInfo = new Client();
-            $apiUrlProjects = "http://3.1.20.54/v1/projects";
-            $responseProject = $clientInfo->request('GET', $apiUrlProjects);
-            $dataProjects = json_decode($responseProject->getBody()->getContents());
+        if($this->checkConnectAllApi()){
+            $dataProjects = $this->getContentApiAllProject();
             $projects = $dataProjects->results;
             $kpiMax = 0;
             foreach ($projects as $project){
                 if($project->completed_time !== null){
-                    if($this->getDataKpiProject($project->id)['kpi'] >= $kpiMax){
-                        if($this->getDataKpiProject($project->id)['kpi'] > $kpiMax){
-                            $data = array();
+                    if($this->checkIdProjectCriteria($project->id)){
+                        if($this->getDataKpiProject($project->id)['kpi'] >= $kpiMax){
+                            if($this->getDataKpiProject($project->id)['kpi'] > $kpiMax){
+                                $data = array();
+                            }
+                            $kpiMax = $this->getDataKpiProject($project->id)['kpi'];
+                            $data[] = $this->getDataKpiProject($project->id);
                         }
-                        $kpiMax = $this->getDataKpiProject($project->id)['kpi'];
-                        $data[] = $this->getDataKpiProject($project->id);
                     }
                 }
             }
-        }catch (\Exception $e){
+        }else{
             $kpiMax = 0;
             $kpiProjects = DB::table('kpi_fake_tables')->get();
             foreach ($kpiProjects as $kpiProject){
@@ -130,7 +131,6 @@ class ProjectController extends Controller
                     }
                 }
             }
-            // return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of departments']], 400);
         }
         return response()->json(['success' => 1, 'data' => $data], 200);
     }
@@ -138,17 +138,16 @@ class ProjectController extends Controller
     // Get project KPI min
     public function evaluateKpiMinProject(){
         $data = array();
-        try{
-            $clientInfo = new Client();
-            $apiUrlProjects = "http://3.1.20.54/v1/projects";
-            $responseProject = $clientInfo->request('GET', $apiUrlProjects);
-            $dataProjects = json_decode($responseProject->getBody()->getContents());
+        if($this->getContentApiAllProject()){
+            $dataProjects = $this->getContentApiAllProject();
             $projects = $dataProjects->results;
             // get project complete
             $projectsKPI = array();
             foreach ($projects as $project){
                 if(isset($project->completed_time)){
-                    $projectsKPI[] = $project;
+                    if($this->checkIdProjectCriteria($project->id)){
+                        $projectsKPI[] = $project;
+                    }
                 }
             }
             // get all kpi project kpi min
@@ -162,7 +161,7 @@ class ProjectController extends Controller
                     $data[] = $this->getDataKpiProject($projectsKPI[$i]->id);
                 }
             }
-        }catch (\Exception $e){
+        }else{
             $kpiProjects = DB::table('kpi_fake_tables')->get();
             $projectsKPI = array();
             foreach ($kpiProjects as $kpiProject){
@@ -192,31 +191,30 @@ class ProjectController extends Controller
                     );
                 }
             }
-            // return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of departments']], 400);
         }
         return response()->json(['success' => 1, 'data' => $data], 200);
     }
 
 
 
+
     // List kpi of all projects with year
     public function evaluateKpiAllProjectYear(Request $request){
         $data = array();
-        try{
-            $year = $request->year;
-            $clientInfo = new Client();
-            $apiUrlProjects = "http://3.1.20.54/v1/projects";
-            $responseProject = $clientInfo->request('GET', $apiUrlProjects);
-            $dataProjects = json_decode($responseProject->getBody()->getContents());
+        $year = $request->year;
+        if($this->checkConnectAllApi()){
+            $dataProjects = $this->getContentApiAllProject();
             $projects = $dataProjects->results;
             foreach ($projects as $project){
                 if($project->completed_time !== null){
                     if(date('Y',$project->created_time) == $year){
-                        $data[]= $this->getDataKpiProject($project->id);
+                        if($this->checkIdProjectCriteria($project->id)){
+                            $data[]= $this->getDataKpiProject($project->id);
+                        }
                     }
                 }
             }
-        }catch (\Exception $e){
+        }else{
             $kpiProjects = DB::table('kpi_fake_tables')->get();
             foreach ($kpiProjects as $kpiProject){
                 $kpiProject = (array)$kpiProject;
@@ -237,7 +235,6 @@ class ProjectController extends Controller
                     }
                 }
             }
-            // return response()->json(['error' => ['message' => 'Something was wrong with evaluating kpi of project']], 400);
         }
 
         if (empty($data)){
@@ -252,159 +249,135 @@ class ProjectController extends Controller
     public function getDataKpiProject($idProject){
 
         // get information project
-        try{
-            $clientProject = new Client();
-            $apiUrlProject = "http://3.1.20.54/v1/projects/".$idProject;
-            $responseProject = $clientProject->request('GET', $apiUrlProject);
-            $dataProjects = json_decode($responseProject->getBody()->getContents());
-            if (isset($dataProjects->name)){
-                $nameProject = $dataProjects->name;
+        $dataProjects = $this->getContentApiProject($idProject);
+        if (isset($dataProjects->name)){
+            $nameProject = $dataProjects->name;
+        }else{
+            $nameProject = '';
+        }
+        if($dataProjects->completed_time !== null){
+            $timeLate = abs($dataProjects->completed_time - $dataProjects->deadline);
+            $timeStandard = abs($dataProjects->deadline - $dataProjects->created_time);
+            $createTime = $dataProjects->created_time;
+            $completeTime = $dataProjects->completed_time;
+            if($timeLate <= 0){
+                $projectReality = 1;
             }else{
-                $nameProject = '';
+                $projectReality = round(($timeLate/$timeStandard),2);
             }
-            if(isset($dataProjects->completed_time)){
-                $timeLate = abs($dataProjects->completed_time - $dataProjects->deadline);
-                $timeStandard = abs($dataProjects->deadline - $dataProjects->created_time);
-                $createTime = $dataProjects->created_time;
-                $completeTime = $dataProjects->completed_time;
-                if($timeLate <= 0){
-                    $projectReality = 1;
-                }else{
-                    $projectReality = round(($timeLate/$timeStandard),2);
-                }
-                $technologyReality = round(0.1*$dataProjects->technique_index,2);
-            }else{
-                return response()->json(['error' => 1, 'message' => "Project wasn't finished "], 400);
-            }
-
-        }catch (\Exception $e){
-            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get project information '], 400);
+            $technologyReality = round(0.1*$dataProjects->technique_index,2);
         }
 
-        try{
-            // get information task in project
-            $clientTaskProject = new Client();
-            $apiUrlTaskProject = "http://3.1.20.54/v1/tasks?project_id=".$idProject;
-            $responseTaskProject = $clientTaskProject->request('GET', $apiUrlTaskProject);
-            $dataTaskProject = json_decode($responseTaskProject->getBody()->getContents());
-            $totalLevel = 0;
-            $totalTask = 0;
-            $totalTimeExecute = 0;
-            $totalTimeStandard = 0;
-            $resultTasks = $dataTaskProject->results;
-            foreach ($resultTasks as $result){
-                if(isset($result->completed_time)){
-                    $totalTimeExecute += $result->completed_time - $result->created_time;
-                    if(isset($result->deadline)){
-                        $totalTimeStandard += $result->deadline - $result->created_time;
-                    }else{
-                        $totalTimeStandard += $result->completed_time - $result->created_time;
-                    }
-                }
-                $totalLevel += $result->level;
-                $totalTask++;
-            }
-            if($totalTimeExecute == 0 && $totalTimeStandard == 0){
-                $qualityReality = 0;
-            }else{
-                if($totalTimeExecute <= $totalTimeStandard){
-                    $qualityReality = 1;
+        // get information task in project
+        $dataTaskProject = $this->getContentApiProjectTask($idProject);
+        $totalLevel = 0;
+        $totalTask = 0;
+        $totalTimeExecute = 0;
+        $totalTimeStandard = 0;
+        $resultTasks = $dataTaskProject->results;
+        foreach ($resultTasks as $result){
+            if(isset($result->completed_time)){
+                $totalTimeExecute += $result->completed_time - $result->created_time;
+                if(isset($result->deadline)){
+                    $totalTimeStandard += $result->deadline - $result->created_time;
                 }else{
-                    $qualityReality = round($totalTimeStandard/$totalTimeExecute,2);
+                    $totalTimeStandard += $result->completed_time - $result->created_time;
                 }
             }
-            if($totalLevel == 0 && $totalTask == 0){
-                $scaleReality = 0;
+            $totalLevel += $result->level;
+            $totalTask++;
+        }
+        if($totalTimeExecute == 0 && $totalTimeStandard == 0){
+            $qualityReality = 0;
+        }else{
+            if($totalTimeExecute <= $totalTimeStandard){
+                $qualityReality = 1;
             }else{
-                $scaleReality = round(($totalLevel/$totalTask)*0.1,2);
+                $qualityReality = round($totalTimeStandard/$totalTimeExecute,2);
             }
-        }catch (\Exception $e){
-            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get task information in project'], 400);
+        }
+        if($totalLevel == 0 && $totalTask == 0){
+            $scaleReality = 0;
+        }else{
+            $scaleReality = round(($totalLevel/$totalTask)*0.1,2);
         }
 
         // get criterion in project + default 4
-        try{
-            $clientCriterion = new Client();
-            $apiUrlCriterion = "http://206.189.34.124:5000/api/group8/kpis?project_id=".$idProject;
-            $responseCriterion = $clientCriterion->request('GET', $apiUrlCriterion);
-            $dataCriterion = json_decode($responseCriterion->getBody()->getContents());
-            $criterionInfos= $dataCriterion->criterias;
-            $criteriaId = $dataCriterion->id;
-            //
-            $addCriteria = array();
-            $progressWeight = 0;
-            $qualityWeight = 0;
-            $scaleWeight = 0;
-            $technologyWeight = 0;
-            $jsonDetailInfo = array();
-            foreach ($criterionInfos as $criterionInfo){
-                switch ($criterionInfo->name) {
-                    case 'Tiến độ dự án':
-                        $progressWeight = $criterionInfo->ratio;
-                        $jsonDetailInfo[]=array(
-                            'data' =>$projectReality,
-                            'ratio' =>$criterionInfo->ratio,
-                            'note'=>$criterionInfo->note,
-                            'name'=>$criterionInfo->name
-                        );
-                        break;
-                    case 'Chất lượng dự án':
-                        $qualityWeight = $criterionInfo->ratio;
-                        $jsonDetailInfo[]=array(
-                            'data' =>$qualityReality,
-                            'ratio' =>$criterionInfo->ratio,
-                            'note'=>$criterionInfo->note,
-                            'name'=>$criterionInfo->name
-                        );
-                        break;
-                    case 'Quy mô mức độ dự án':
-                        $scaleWeight = $criterionInfo->ratio;
-                        $jsonDetailInfo[]=array(
-                            'data' =>$scaleReality,
-                            'ratio' =>$criterionInfo->ratio,
-                            'note'=>$criterionInfo->note,
-                            'name'=>$criterionInfo->name
-                        );
-                        break;
-                    case 'Yếu tố kĩ thuật':
-                        $technologyWeight = $criterionInfo->ratio;
-                        $jsonDetailInfo[]=array(
-                            'data' =>$technologyReality,
-                            'ratio' =>$criterionInfo->ratio,
-                            'note'=>$criterionInfo->note,
-                            'name'=>$criterionInfo->name
-                        );
-                        break;
-                    default:
-                        // check in database to get value data to get value which updated
-                        $kpiUpdateProject = DB::table("kpi_project_update")->where('id_project',$idProject)->where('id_criteria',$criteriaId)->first();
-                        if($kpiUpdateProject !== null){
-                            $dataCriteriasSaved = json_decode($kpiUpdateProject->data);
-                            foreach ($dataCriteriasSaved as $dataCriteriaSaved){
-                                if ($dataCriteriaSaved->name == $criterionInfo->name){
-                                    $addCriteria[$criterionInfo->name]= array('ratio'=>$criterionInfo->ratio,'data'=>$dataCriteriaSaved->reality);
-                                    $jsonDetailInfo[]=array(
-                                        'data' =>$dataCriteriaSaved->reality,
-                                        'ratio' =>$criterionInfo->ratio,
-                                        'note'=>$criterionInfo->note,
-                                        'name'=>$criterionInfo->name
-                                    );
-                                }
+        $dataCriterion = $this->getContentCriteriaProject($idProject);
+        $criterionInfos= $dataCriterion->criterias;
+        $criteriaId = $dataCriterion->id;
+        //
+        $addCriteria = array();
+        $progressWeight = 0;
+        $qualityWeight = 0;
+        $scaleWeight = 0;
+        $technologyWeight = 0;
+        $jsonDetailInfo = array();
+        foreach ($criterionInfos as $criterionInfo){
+            switch ($criterionInfo->name) {
+                case 'Tiến độ dự án':
+                    $progressWeight = $criterionInfo->ratio;
+                    $jsonDetailInfo[]=array(
+                        'data' =>$projectReality,
+                        'ratio' =>$criterionInfo->ratio,
+                        'note'=>$criterionInfo->note,
+                        'name'=>$criterionInfo->name
+                    );
+                    break;
+                case 'Chất lượng dự án':
+                    $qualityWeight = $criterionInfo->ratio;
+                    $jsonDetailInfo[]=array(
+                        'data' =>$qualityReality,
+                        'ratio' =>$criterionInfo->ratio,
+                        'note'=>$criterionInfo->note,
+                        'name'=>$criterionInfo->name
+                    );
+                    break;
+                case 'Quy mô mức độ dự án':
+                    $scaleWeight = $criterionInfo->ratio;
+                    $jsonDetailInfo[]=array(
+                        'data' =>$scaleReality,
+                        'ratio' =>$criterionInfo->ratio,
+                        'note'=>$criterionInfo->note,
+                        'name'=>$criterionInfo->name
+                    );
+                    break;
+                case 'Yếu tố kĩ thuật':
+                    $technologyWeight = $criterionInfo->ratio;
+                    $jsonDetailInfo[]=array(
+                        'data' =>$technologyReality,
+                        'ratio' =>$criterionInfo->ratio,
+                        'note'=>$criterionInfo->note,
+                        'name'=>$criterionInfo->name
+                    );
+                    break;
+                default:
+                    // check in database to get value data to get value which updated
+                    $kpiUpdateProject = DB::table("kpi_project_update")->where('id_project',$idProject)->where('id_criteria',$criteriaId)->first();
+                    if($kpiUpdateProject !== null){
+                        $dataCriteriasSaved = json_decode($kpiUpdateProject->data);
+                        foreach ($dataCriteriasSaved as $dataCriteriaSaved){
+                            if ($dataCriteriaSaved->name == $criterionInfo->name){
+                                $addCriteria[$criterionInfo->name]= array('ratio'=>$criterionInfo->ratio,'data'=>$dataCriteriaSaved->reality);
+                                $jsonDetailInfo[]=array(
+                                    'data' =>$dataCriteriaSaved->reality,
+                                    'ratio' =>$criterionInfo->ratio,
+                                    'note'=>$criterionInfo->note,
+                                    'name'=>$criterionInfo->name
+                                );
                             }
-                        }else{
-                            $addCriteria[$criterionInfo->name]= array('ratio'=>$criterionInfo->ratio,'data'=>0);
-                            $jsonDetailInfo[]=array(
-                                'data' =>0,
-                                'ratio' =>$criterionInfo->ratio,
-                                'note'=>$criterionInfo->note,
-                                'name'=>$criterionInfo->name
-                            );
                         }
-                        break;
-                }
+                    }else{
+                        $addCriteria[$criterionInfo->name]= array('ratio'=>$criterionInfo->ratio,'data'=>0);
+                        $jsonDetailInfo[]=array(
+                            'data' =>0,
+                            'ratio' =>$criterionInfo->ratio,
+                            'note'=>$criterionInfo->note,
+                            'name'=>$criterionInfo->name
+                        );
+                    }
+                    break;
             }
-        }catch (\Exception $e){
-            return response()->json(['error' => 1, 'message' => 'Something was wrong with api get criteria '], 400);
         }
 
         // calculate kip  and compare
@@ -492,5 +465,82 @@ class ProjectController extends Controller
         }catch (\Exception $exception){
             return response()->json(['error' => 1, 'message' => 'Something was wrong with save database '], 400);
         }
+    }
+
+
+    // Get infor api connect
+    public function getContentApiAllProject(){
+        $clientInfo = new Client();
+        $apiUrlProjects = "http://3.1.20.54/v1/projects";
+        $responseProject = $clientInfo->request('GET', $apiUrlProjects);
+        return json_decode($responseProject->getBody()->getContents());
+    }
+
+    public function getContentApiProject($idProject){
+        $clientProject = new Client();
+        $apiUrlProject = "http://3.1.20.54/v1/projects/".$idProject;
+        $responseProject = $clientProject->request('GET', $apiUrlProject);
+        return json_decode($responseProject->getBody()->getContents());
+    }
+
+    public function getContentApiProjectTask($idProject){
+        $clientTaskProject = new Client();
+        $apiUrlTaskProject = "http://3.1.20.54/v1/tasks?project_id=".$idProject;
+        $responseTaskProject = $clientTaskProject->request('GET', $apiUrlTaskProject);
+        return json_decode($responseTaskProject->getBody()->getContents());
+    }
+
+    public function getContentCriteriaProject($idProject){
+        $clientCriterion = new Client();
+        $apiUrlCriterion = "http://206.189.34.124:5000/api/group8/kpis?project_id=".$idProject;
+        $responseCriterion = $clientCriterion->request('GET', $apiUrlCriterion);
+        return json_decode($responseCriterion->getBody()->getContents());
+    }
+
+    public function getContentCriteriaAllProject(){
+        $clientCriterion = new Client();
+        $apiUrlAllCriterion = "http://206.189.34.124:5000/api/group8/kpis/all?type=PROJECT";
+        $responseAllCriterion = $clientCriterion->request('GET', $apiUrlAllCriterion);
+        return json_decode($responseAllCriterion->getBody()->getContents());
+    }
+
+    // get all id_project which created criteria
+
+    public function getIdsProjectCriteria(){
+        $ids = array();
+        $criteriaProjects = $this->getContentCriteriaAllProject()->kpis;
+        foreach ($criteriaProjects as $criteriaProject){
+            array_push($ids,$criteriaProject->project_id);
+        }
+        return $ids;
+    }
+
+    // check project which have criteria information
+    public function checkIdProjectCriteria($projectId){
+        $idProjectCriteria = $this->getIdsProjectCriteria();
+        if(in_array($projectId,$idProjectCriteria)){
+            return true;
+        }
+        return false;
+    }
+    // check connect api which use to calculate kpi project
+    public function checkConnectAllApi(){
+        $check = true;
+        try {
+            $dataAllCriteriaProject = $this->getContentCriteriaAllProject();
+            $idProjectCriteria = $this->getIdsProjectCriteria();
+            $projects = $this->getContentApiAllProject()->results;
+            foreach ($projects as $project){
+                if($project->completed_time !== null){
+                    if(in_array($project->id,$idProjectCriteria)){
+                        $dataTaskProject = $this->getContentApiProjectTask($project->id);
+                        $dataCriterion = $this->getContentCriteriaProject($project->id);
+                    }
+                }
+            }
+        }catch (\Exception $exception){
+            $check = false;
+        }
+        return $check;
     }
 }
