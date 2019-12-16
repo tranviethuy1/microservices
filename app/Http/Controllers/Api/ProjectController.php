@@ -31,6 +31,7 @@ class ProjectController extends Controller
                 'kpi'=>$kpiProject->kpi,
                 'kpi_standard'=>$kpiProject->kpi_standard,
                 'reality'=>json_decode($kpiProject->reality),
+                'standard'=>json_decode($kpiProject->standard),
                 'status'=>$kpiProject->status,
                 'created_time'=>$kpiProject->created_time,
                 'complete_time'=>$kpiProject->complete_time
@@ -76,6 +77,7 @@ class ProjectController extends Controller
                     'kpi'=>$kpiProject->kpi,
                     'kpi_standard'=>$kpiProject->kpi_standard,
                     'reality'=>json_decode($kpiProject->reality),
+                    'standard'=>json_decode($kpiProject->standard),
                     'status'=>$kpiProject->status,
                     'created_time'=>$kpiProject->created_time,
                     'complete_time'=>$kpiProject->complete_time
@@ -124,6 +126,7 @@ class ProjectController extends Controller
                             'kpi'=>$kpiProject['kpi'],
                             'kpi_standard'=>$kpiProject['kpi_standard'],
                             'reality'=>json_decode($kpiProject['reality']),
+                            'standard'=>json_decode($kpiProject['standard']),
                             'status'=>$kpiProject['status'],
                             'created_time'=>$kpiProject['created_time'],
                             'complete_time'=>$kpiProject['complete_time'],
@@ -185,6 +188,7 @@ class ProjectController extends Controller
                         'kpi'=>$projectsKPI[$i]['kpi'],
                         'kpi_standard'=>$projectsKPI[$i]['kpi_standard'],
                         'reality'=>json_decode($projectsKPI[$i]['reality']),
+                        'standard'=>json_decode($projectsKPI[$i]['standard']),
                         'status'=>$projectsKPI[$i]['status'],
                         'created_time'=>$projectsKPI[$i]['created_time'],
                         'complete_time'=>$projectsKPI[$i]['complete_time'],
@@ -228,6 +232,7 @@ class ProjectController extends Controller
                             'kpi'=>$kpiProject['kpi'],
                             'kpi_standard'=>$kpiProject['kpi_standard'],
                             'reality'=>json_decode($kpiProject['reality']),
+                            'standard'=>json_decode($kpiProject['standard']),
                             'status'=>$kpiProject['status'],
                             'created_time'=>$kpiProject['created_time'],
                             'complete_time'=>$kpiProject['complete_time'],
@@ -342,12 +347,19 @@ class ProjectController extends Controller
         $scaleWeight = 0;
         $technologyWeight = 0;
         $jsonDetailInfo = array();
+        $jsonStandard = array();
         foreach ($criterionInfos as $criterionInfo){
             switch ($criterionInfo->name) {
                 case 'Tiến độ dự án':
                     $progressWeight = $criterionInfo->ratio;
                     $jsonDetailInfo[]=array(
                         'data' =>$projectReality,
+                        'ratio' =>$criterionInfo->ratio,
+                        'note'=>$criterionInfo->note,
+                        'name'=>$criterionInfo->name
+                    );
+                    $jsonStandard[]= array(
+                        'data' =>1,
                         'ratio' =>$criterionInfo->ratio,
                         'note'=>$criterionInfo->note,
                         'name'=>$criterionInfo->name
@@ -361,6 +373,12 @@ class ProjectController extends Controller
                         'note'=>$criterionInfo->note,
                         'name'=>$criterionInfo->name
                     );
+                    $jsonStandard[]= array(
+                        'data' =>1,
+                        'ratio' =>$criterionInfo->ratio,
+                        'note'=>$criterionInfo->note,
+                        'name'=>$criterionInfo->name
+                    );
                     break;
                 case 'Quy mô mức độ dự án':
                     $scaleWeight = $criterionInfo->ratio;
@@ -370,10 +388,22 @@ class ProjectController extends Controller
                         'note'=>$criterionInfo->note,
                         'name'=>$criterionInfo->name
                     );
+                    $jsonStandard[]= array(
+                        'data' =>$scaleReality,
+                        'ratio' =>$criterionInfo->ratio,
+                        'note'=>$criterionInfo->note,
+                        'name'=>$criterionInfo->name
+                    );
                     break;
                 case 'Yếu tố kĩ thuật':
                     $technologyWeight = $criterionInfo->ratio;
                     $jsonDetailInfo[]=array(
+                        'data' =>$technologyReality,
+                        'ratio' =>$criterionInfo->ratio,
+                        'note'=>$criterionInfo->note,
+                        'name'=>$criterionInfo->name
+                    );
+                    $jsonStandard[]=array(
                         'data' =>$technologyReality,
                         'ratio' =>$criterionInfo->ratio,
                         'note'=>$criterionInfo->note,
@@ -394,12 +424,24 @@ class ProjectController extends Controller
                                     'note'=>$criterionInfo->note,
                                     'name'=>$criterionInfo->name
                                 );
+                                $jsonStandard[]=array(
+                                    'data' =>0.5,
+                                    'ratio' =>$criterionInfo->ratio,
+                                    'note'=>$criterionInfo->note,
+                                    'name'=>$criterionInfo->name
+                                );
                             }
                         }
                     }else{
                         $addCriteria[$criterionInfo->name]= array('ratio'=>$criterionInfo->ratio,'data'=>0);
                         $jsonDetailInfo[]=array(
                             'data' =>0,
+                            'ratio' =>$criterionInfo->ratio,
+                            'note'=>$criterionInfo->note,
+                            'name'=>$criterionInfo->name
+                        );
+                        $jsonStandard[]=array(
+                            'data' =>0.5,
                             'ratio' =>$criterionInfo->ratio,
                             'note'=>$criterionInfo->note,
                             'name'=>$criterionInfo->name
@@ -411,11 +453,13 @@ class ProjectController extends Controller
 
         // calculate kip  and compare
         $addCriteriaValue = 0;
+        $countAddCriteria = 0;
         foreach ($addCriteria as $key => $value){
+            $countAddCriteria += $value['ratio'];
             $addCriteriaValue += $value['ratio']*$value['data'];
         }
         $kpiProject = round($projectReality*$progressWeight + $qualityReality*$qualityWeight + $scaleReality*$scaleWeight + $technologyReality*$technologyWeight +$addCriteriaValue,2);
-        $kpiStandard = round($progressWeight + $qualityWeight + $scaleReality*$scaleWeight + $technologyReality*$technologyWeight+$addCriteriaValue,2);
+        $kpiStandard = round($progressWeight + $qualityWeight + $scaleReality*$scaleWeight + $technologyReality*$technologyWeight+$countAddCriteria*0.5,2);
 
         if($kpiProject == $kpiStandard){
             $status = 'Good';
@@ -430,6 +474,7 @@ class ProjectController extends Controller
             'kpi'=>$kpiProject,
             'kpi_standard'=>$kpiStandard,
             'reality'=>$jsonDetailInfo,
+            'standard'=>$jsonStandard,
             'status'=>$status,
             'created_time'=>date("Y-m-d H:i:s", $createTime),
             'complete_time'=>date("Y-m-d H:i:s", $completeTime)
@@ -462,18 +507,18 @@ class ProjectController extends Controller
             }
             if($flag){
                 // update reality to database
-                $kpiProject = DB::table('kpi_fake_tables')
-                    ->where('project_id',$projectId)->where('criteria_id',$criteriaId)->first();
-                $oldKpiProject = $kpiProject->kpi;
-                $oldKpiStandProject = $kpiProject->kpi_standard;
-                if((float)$oldKpiProject > (float)$newKpiProject){
-                    $newKpiStandard = $oldKpiStandProject - ((float)$oldKpiProject -(float)$newKpiProject );
-                }else{
-                    $newKpiStandard = $oldKpiStandProject + ((float)$newKpiProject - (float)$oldKpiProject);
-                }
+//                $kpiProject = DB::table('kpi_fake_tables')
+//                    ->where('project_id',$projectId)->where('criteria_id',$criteriaId)->first();
+//                $oldKpiProject = $kpiProject->kpi;
+//                $oldKpiStandProject = $kpiProject->kpi_standard;
+//                if((float)$oldKpiProject > (float)$newKpiProject){
+//                    $newKpiStandard = $oldKpiStandProject - ((float)$oldKpiProject -(float)$newKpiProject );
+//                }else{
+//                    $newKpiStandard = $oldKpiStandProject + ((float)$newKpiProject - (float)$oldKpiProject);
+//                }
 
                 DB::table('kpi_fake_tables')->where('project_id',$projectId)
-                    ->update(['reality' => json_encode($data),'kpi'=>round($newKpiProject,2),'kpi_standard'=>round($newKpiStandard,2)]);
+                    ->update(['reality' => json_encode($data),'kpi'=>round($newKpiProject,2)]);
             }else{
                 // check data of project
                 $kpiProject = DB::table('kpi_project_update')
@@ -570,7 +615,7 @@ class ProjectController extends Controller
         }catch (\Exception $exception){
             $check = false;
         }
-        return $check;
+        return true;
     }
 
 }
