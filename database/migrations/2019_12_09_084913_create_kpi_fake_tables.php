@@ -21,6 +21,7 @@ class CreateKpiFakeTables extends Migration
             $table->string('kpi');
             $table->string('kpi_standard');
             $table->longText('reality');
+            $table->longText('standard');
             $table->string('status');
             $table->date('created_time');
             $table->date('complete_time');

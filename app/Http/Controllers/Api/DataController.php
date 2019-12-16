@@ -140,6 +140,7 @@ class DataController extends Controller
             $index++;
             $completedBy = $kpiProject['complete_time'];
             $reality = $kpiProject['reality'];
+            $standard = $kpiProject['standard'];
             $yearProject = date('Y', strtotime($completedBy));
             if($yearInput == $yearProject){
                 if($projectController->checkConnectAllApi()){
@@ -162,6 +163,7 @@ class DataController extends Controller
                 $dataProjects['kpi_standard'] = $kpiProject['kpi_standard'];
                 $dataProjects['criteria'] = (array)$dataCriterion;
                 $dataProjects['reality'] = (array)$reality;
+                $dataProjects['standard'] = (array)$standard;
                 $data[$index] = $dataProjects;
             }
         }
